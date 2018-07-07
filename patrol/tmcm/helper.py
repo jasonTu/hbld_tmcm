@@ -78,9 +78,30 @@ def do_get_scan_detail():
         data = db.exc_query(G_SQL_SCAN_DETAIL)
         result = adjust_scan_detail(data)
         print(result)
+    return result
+
+
+def adjust_basic_info(result):
+    '''Adjust osce agent basic info for view.'''
+    ret = []
+    for item in result:
+        aitem = {}
+        aitem['ip'] = item[0]
+        aitem['install_date'] = str(item[1])
+        aitem['last_active_date'] = str(item[2])
+        aitem['engine'] = item[3]
+        aitem['pattern'] = item[4]
+        ret.append(aitem)
+    return ret
+
 
 def do_get_basic_info():
-    pass
+    '''Get osce agent basic info helper func.'''
+    with MssqlUtil('192.168.1.192', 'sa', 'puyacn#1..', 'db_ControlManager') as db:
+        data = db.exc_query(G_SQL_BASIC_INFO)
+        result = adjust_basic_info(data)
+        print(result)
+    return result
 
 
 if __name__ == '__main__':
@@ -90,3 +111,4 @@ if __name__ == '__main__':
         print(data)
     '''
     do_get_scan_detail()
+    do_get_basic_info()
