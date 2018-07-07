@@ -72,9 +72,9 @@ def adjust_scan_detail(result):
     return ret
 
 
-def do_get_scan_detail():
+def do_get_scan_detail(db_conf):
     '''Get scan detail helper func.'''
-    with MssqlUtil('192.168.1.192', 'sa', 'puyacn#1..', 'db_ControlManager') as db:
+    with MssqlUtil(db_conf['ip'], db_conf['user'], db_conf['passwd'], db_conf['db']) as db:
         data = db.exc_query(G_SQL_SCAN_DETAIL)
         result = adjust_scan_detail(data)
         print(result)
@@ -95,9 +95,9 @@ def adjust_basic_info(result):
     return ret
 
 
-def do_get_basic_info():
+def do_get_basic_info(db_conf):
     '''Get osce agent basic info helper func.'''
-    with MssqlUtil('192.168.1.192', 'sa', 'puyacn#1..', 'db_ControlManager') as db:
+    with MssqlUtil(db_conf['ip'], db_conf['user'], db_conf['passwd'], db_conf['db']) as db:
         data = db.exc_query(G_SQL_BASIC_INFO)
         result = adjust_basic_info(data)
         print(result)
