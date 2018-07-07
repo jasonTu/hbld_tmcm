@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import json
+import traceback
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -134,3 +136,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
 }
+
+G_CFG_FILE = os.path.join(BASE_DIR, 'conf/patrol.conf')
+try:
+    with open(G_CFG_FILE) as fp:
+        G_CONF = json.load(fp)
+except Exception:
+    print(traceback.format_exc())
+    G_CONF = {}
