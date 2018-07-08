@@ -86,12 +86,17 @@ def do_get_scan_detail(db_conf, agent, begin, end):
 
 def adjust_basic_info(result):
     '''Adjust osce agent basic info for view.'''
+    date_reg = r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}'
     ret = []
     for item in result:
         aitem = {}
         aitem['ip'] = item[0]
         aitem['install_date'] = str(item[1])
-        aitem['last_active_date'] = str(item[2])
+        re_result = re.match(date_reg, str(item[2]))
+        if re_result:
+            aitem['last_active_date'] = re_result.group()
+        else:
+            aitem['last_active_date'] = None
         aitem['engine'] = item[3].strip()
         aitem['pattern'] = item[4]
         ret.append(aitem)

@@ -13,7 +13,20 @@ G_SIGN_KEY = '21be83530509abc81aa945a02bec37601cf3cc21'
 
 
 def gen_signature(qparams):
-    '''Generate signature by query string params.'''
+    '''
+    Generate signature by query string params.
+    e.g.:
+    /api/v1/basicinfo/?timestamp=1531019847&sign=04e9e630869012b9ca1e6d9d1ceec1ec604e95cb&app_key=ca2bf41f1910a9c359370ebf87caeafd
+    sign: 04e9e630869012b9ca1e6d9d1ceec1ec604e95cb --> the client calculate signature
+    app_key: ca2bf41f1910a9c359370ebf87caeafd  --> app key
+    timestamp: 1531019847 --> timestamp when the request send
+    Firstly need sort the query string params by the key name order,
+    remove the link character like "&" and "=",
+    initial the contacted string as sign key(21be83530509abc81aa945a02bec37601cf3cc21),
+    then the concacted string is:
+    21be83530509abc81aa945a02bec37601cf3cc21app_keyca2bf41f1910a9c359370ebf87caeafdtimestamp1531019847
+    code the string with sha1 algorithm:
+    '''
     keys = list(qparams.keys())
     keys.sort()
     contact_str = G_SIGN_KEY
@@ -25,6 +38,7 @@ def gen_signature(qparams):
 
 
 def query_basicinfo():
+    '''Example for get osce agent info.'''
     url = 'http://192.168.1.198:18080/api/v1/basicinfo/'
     ts = int(time.time())
     query_params = {
@@ -39,6 +53,7 @@ def query_basicinfo():
 
 
 def query_scan_detail():
+    '''Example for get osce scan detail info.'''
     url = 'http://192.168.1.198:18080/api/v1/scandetail/'
     ts = int(time.time())
     query_params = {
@@ -57,4 +72,4 @@ def query_scan_detail():
 
 if __name__ == '__main__':
     query_scan_detail()
-    # query_basicinfo()
+    query_basicinfo()
