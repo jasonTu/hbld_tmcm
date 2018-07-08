@@ -24,7 +24,7 @@ def gen_signature(qparams):
     return sign
 
 
-def main():
+def query_basicinfo():
     url = 'http://192.168.1.198:18080/api/v1/basicinfo/'
     ts = int(time.time())
     query_params = {
@@ -35,8 +35,26 @@ def main():
     query_params['sign'] = sign
     resp = requests.get(url, params=query_params)
     print(resp.status_code)
-    print(resp.content)
+    print(resp.json())
+
+
+def query_scan_detail():
+    url = 'http://192.168.1.198:18080/api/v1/scandetail/'
+    ts = int(time.time())
+    query_params = {
+        'timestamp': str(ts),
+        'app_key': G_APP_KEY,
+        'agent': '192.168.1.55',
+        'begin': '2018-07-04',
+        'end': '2018-07-08'
+    }
+    sign = gen_signature(query_params)
+    query_params['sign'] = sign
+    resp = requests.get(url, params=query_params)
+    print(resp.status_code)
+    print(resp.json())
 
 
 if __name__ == '__main__':
-    main()
+    query_scan_detail()
+    # query_basicinfo()

@@ -1,15 +1,16 @@
+import re
 import pymssql
 
 
 G_SQL_SCAN_DETAIL = '''
 declare @begin datetime,@end datetime
-set @begin='2018-07-05'
-set @end='2018-07-07'
+set @begin='{begin}'
+set @end='{end}'
 select tb_av.VLF_FilePath, tb_av.VLF_FileName,
 tb_av.CLF_ReasonCode, tb_av.CLF_LogGenerationTime
 from tb_AVViruslog as tb_av join tb_EntityIPAddress as tb_ei
 on tb_av.VLF_ClientGUID=tb_ei.EntityID
-where tb_ei.IPAddress='192.168.1.55'
+where tb_ei.IPAddress='{agent}'
 and CLF_LogGenerationTime between @begin and @end;
 '''
 G_SQL_BASIC_INFO = '''
@@ -72,10 +73,12 @@ def adjust_scan_detail(result):
     return ret
 
 
-def do_get_scan_detail(db_conf):
+def do_get_scan_detail(db_conf, agent, begin, end):
     '''Get scan detail helper func.'''
     with MssqlUtil(db_conf['ip'], db_conf['user'], db_conf['passwd'], db_conf['db']) as db:
-        data = db.exc_query(G_SQL_SCAN_DETAIL)
+        data = db.exc_query(G_SQL_SCAN_DETAIL.format(
+            agent=agent, begin=begin, end=end
+        ))
         result = adjust_scan_detail(data)
         print(result)
     return result
@@ -89,7 +92,7 @@ def adjust_basic_info(result):
         aitem['ip'] = item[0]
         aitem['install_date'] = str(item[1])
         aitem['last_active_date'] = str(item[2])
-        aitem['engine'] = item[3]
+        aitem['engine'] = item[3].strip()
         aitem['pattern'] = item[4]
         ret.append(aitem)
     return ret
@@ -102,6 +105,39 @@ def do_get_basic_info(db_conf):
         result = adjust_basic_info(data)
         print(result)
     return result
+
+
+def valid_date_param(param):
+    '''Validate date format.'''
+    date_reg = r'(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})'
+    ret = re.match(date_reg, param)
+    if not ret:
+        return False
+    if ret.group('year') == '0000' or ret.group('month') in ('0', '00') or \
+            ret.group('day') in ('0', '00'):
+        return False
+    return True
+
+
+def valid_ip_param(param):
+    ip_reg = '^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$'
+    compile_ip = re.compile(ip_reg)
+    if compile_ip.match(param):
+        return True
+    else:
+        return False
+
+
+def check_scan_detail_params(query_params):
+    must_params = ['begin', 'end', 'agent']
+    for param in must_params:
+        if param not in query_params:
+            return False
+    if not (valid_date_param(query_params['begin']) and valid_date_param(query_params['end'])):
+        return False
+    if not valid_ip_param(query_params['agent']):
+        return False
+    return True
 
 
 if __name__ == '__main__':
