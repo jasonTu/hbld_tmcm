@@ -15,7 +15,8 @@ and CLF_LogGenerationTime between @begin and @end;
 '''
 G_SQL_BASIC_INFO = '''
 select distinct tb_ei.EI_IPAddressList, tb_ei.EI_LastRegistrationTime,
-tb_tn.LastUpdateTime, tb_pi.SPI_PatternVersion, tb_eni.SEI_EngineVersion
+tb_tn.LastUpdateTime, tb_pi.SPI_PatternVersion, tb_eni.SEI_EngineVersion,
+tb_ei.LastScheduleScanUTC, tb_ei.LastManualScanUTC, tb_ei.LastScanNowScanUTC
 from tb_EntityInfo as tb_ei
 join tb_TreeNode as tb_tn on tb_ei.EI_EntityID=tb_tn.Guid
 join tb_AVStatusPatternInfo as tb_pi on tb_ei.EI_EntityID=tb_pi.SPI_EntityID
@@ -84,6 +85,14 @@ def do_get_scan_detail(db_conf, agent, begin, end):
     return result
 
 
+def get_latest_time(tlist):
+    '''Get latest date time.'''
+    exist_date_list = [item for item in tlist if item is not None]
+    if not exist_date_list:
+        return None
+    return sorted(exist_date_list, reverse=True)[0]
+
+
 def adjust_basic_info(result):
     '''Adjust osce agent basic info for view.'''
     date_reg = r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}'
@@ -99,6 +108,10 @@ def adjust_basic_info(result):
             aitem['last_active_date'] = None
         aitem['engine'] = item[3].strip()
         aitem['pattern'] = item[4]
+        # Parse last scanned time
+        aitem['scanned_time'] = get_latest_time([item[5], item[6], item[7]])
+        if aitem['scanned_time']:
+            aitem['scanned_time'] = str(aitem['scanned_time'])
         ret.append(aitem)
     return ret
 
