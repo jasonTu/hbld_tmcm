@@ -61,7 +61,7 @@ def query_scan_detail():
         'app_key': G_APP_KEY,
         'agent': '192.168.1.55',
         'begin': '2018-07-04',
-        'end': '2018-07-08'
+        'end': '2018-07-10'
     }
     sign = gen_signature(query_params)
     query_params['sign'] = sign

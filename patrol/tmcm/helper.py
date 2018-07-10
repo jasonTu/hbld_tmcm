@@ -1,5 +1,6 @@
 import re
 import pymssql
+import datetime
 
 
 G_SQL_SCAN_DETAIL = '''
@@ -74,8 +75,21 @@ def adjust_scan_detail(result):
     return ret
 
 
+def handle_end_date(end):
+    '''Process the end date param.'''
+    date_reg = r'(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})'
+    ret = re.match(date_reg, end)
+    dt = datetime.datetime(
+        int(ret.group('year')), int(ret.group('month')),
+        int(ret.group('day'))
+    )
+    dt_1 = dt + datetime.timedelta(days=1)
+    return str(dt_1)
+
+
 def do_get_scan_detail(db_conf, agent, begin, end):
     '''Get scan detail helper func.'''
+    end = handle_end_date(end)
     with MssqlUtil(db_conf['ip'], db_conf['user'], db_conf['passwd'], db_conf['db']) as db:
         data = db.exc_query(G_SQL_SCAN_DETAIL.format(
             agent=agent, begin=begin, end=end
