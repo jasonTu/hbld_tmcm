@@ -8,7 +8,7 @@ declare @begin datetime,@end datetime
 set @begin='{begin}'
 set @end='{end}'
 select tb_av.VLF_FilePath, tb_av.VLF_FileName,
-tb_av.CLF_ReasonCode, tb_av.CLF_LogGenerationTime
+tb_av.VLF_VirusName, tb_av.CLF_LogGenerationTime
 from tb_AVViruslog as tb_av join tb_EntityIPAddress as tb_ei
 on tb_av.VLF_ClientGUID=tb_ei.EntityID
 where tb_ei.IPAddress='{agent}'
@@ -23,9 +23,12 @@ join tb_TreeNode as tb_tn on tb_ei.EI_EntityID=tb_tn.Guid
 join tb_AVStatusPatternInfo as tb_pi on tb_ei.EI_EntityID=tb_pi.SPI_EntityID
 join tb_AVStatusEngineInfo as tb_eni on tb_ei.EI_EntityID=tb_eni.SEI_EntityID
 where tb_ei.EI_Type=2
-and tb_pi.SPI_PatternType=1208090624
-and tb_eni.SEI_EngineType=570425346
+and tb_pi.SPI_PatternType=4
+and tb_eni.SEI_EngineType in (16, 4096)
 '''
+
+# and tb_pi.SPI_PatternType=1208090624
+# and tb_eni.SEI_EngineType=570425346
 
 
 class MssqlUtil:
@@ -120,8 +123,8 @@ def adjust_basic_info(result):
             aitem['last_active_date'] = re_result.group()
         else:
             aitem['last_active_date'] = None
-        aitem['engine'] = item[3].strip()
-        aitem['pattern'] = item[4]
+        aitem['pattern'] = item[3].strip()
+        aitem['engine'] = item[4]
         # Parse last scanned time
         aitem['scanned_time'] = get_latest_time([item[5], item[6], item[7]])
         if aitem['scanned_time']:
