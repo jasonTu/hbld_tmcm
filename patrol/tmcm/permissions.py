@@ -9,7 +9,7 @@ class APIKeyPermission(permissions.BasePermission):
     """API key permission."""
 
     def has_permission(self, request, view):
-        must_key = ['app_key', 'sign', 'timestamp']
+        must_key = ['app_key', 'sign']
         for key in must_key:
             if key not in request.query_params:
                 return False
